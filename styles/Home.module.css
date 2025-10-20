@@ -1,0 +1,385 @@
+.body {
+  margin: 0px;
+}
+
+.contenedor {
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 0.5rem;
+  font-family: 'Inter', sans-serif;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  min-height: 100vh;
+}
+
+.logo {
+  margin-bottom: 1.5rem;  /* separa el logo del título */
+  width: 100%;
+  height: auto;
+}
+
+.contenedor h1 {
+  text-align: center;
+  margin-bottom: 1rem;
+}
+
+.titulo {
+  text-align: center;
+  font-size: 1.5rem;
+  margin-bottom: 1rem;
+}
+
+.botones_abajo,
+.botones {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  margin-bottom: 1rem;
+  flex-wrap: wrap;
+  width: 100%;
+  padding: 0rem 1rem;
+}
+
+.botones_pendientes {
+  border: 2px solid #000000;
+  border-radius: 6px;
+  margin-bottom: 1rem;
+  background: #f8f8f8;
+  width: 100%;
+}
+
+.tabla {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 1rem;
+}
+
+.encabezado {
+  background-color: #f5f5f5;
+}
+
+.celda {
+  border: 1px solid #ddd;
+  padding: 0.75rem;
+  text-align: left;
+}
+
+.botones_abajo button {
+  font-size: 1.5rem;
+  padding: 0.5rem 1rem;
+  flex: 1 1 30%;
+  font-family: 'Inter', sans-serif;
+}
+
+.botones button {
+  font-size: 1.5rem;
+  padding: 0.5rem 1rem;
+  flex: 1 1 30%;
+  min-width: 180px;
+  border-radius: 10px;
+  border: 0px;
+  font-family: 'Inter', sans-serif;
+}
+
+.lista {
+  list-style: none;
+  padding: 0;
+}
+
+.sinDatos {
+  text-align: center;
+  color: #777;
+}
+
+.modal {
+  position: fixed;
+  top: 10%;
+  left: 50%;
+  transform: translateX(-50%);
+  background: white;
+  border: 1px solid #ccc;
+  padding: 1rem;
+  width: 90%;
+  max-width: 400px;
+  box-shadow: 0 0 10px rgba(0,0,0,0.1);
+  z-index: 10;
+}
+
+.modal input {
+  display: block;
+  width: 100%;
+  margin-bottom: 0.5rem;
+  padding: 0.5rem;
+  font-size: 1rem;
+  font-family: 'Inter', sans-serif;
+}
+
+.materialesLista li {
+  max-width: 100%;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  white-space: normal;
+  word-break: break-word;
+  margin-bottom: 0.5rem;
+}
+
+.overlay {
+  position: fixed;
+  top: 0; left: 0; width: 100vw; height: 100vh;
+  background: rgba(0,0,0,0.18);
+  z-index: 5000;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.botonIndex {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.primerCuadro{
+  background-color: #f0f0f0;
+  border-radius: 15px;
+  margin: 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 10px;
+  width: 100%;
+}
+
+.modal {
+  background: #fff;
+  border-radius: 12px;
+  padding: 2rem 1.8rem;
+  box-shadow: 0 8px 32px 0 rgba(60, 60, 100, 0.17);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 250px;
+  min-height: 150px;
+}
+
+.spinner {
+  border: 5px solid #f0f0f0;
+  border-top: 5px solid #0074D9;
+  border-radius: 50%;
+  width: 48px;
+  height: 48px;
+  animation: spin 1s linear infinite;
+  margin-bottom: 0.5rem;
+}
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+
+.header2 {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  padding: 0 1rem;
+  gap: 0.5rem;  /* Espacio entre botones e input */
+}
+
+
+.bloque_busqueda {
+  width: 100%;
+  margin-bottom: 1.5rem;
+  padding: 0 1rem;
+}
+/* Estilos base que ya tenías */
+.btnLibre2 {
+  flex: 1; /* El input ocupará el espacio entre botones */
+  padding: 0; /* Elimino el padding/margin lateral */
+  margin: 0;
+}
+
+.iconBtn2 {
+  font-size: 1rem;
+  padding: 0rem;
+  border-radius: 10px;
+  border: none;
+  /* Si quieres, define un ancho fijo */
+  min-width: 49px;
+  min-height: 49px;
+}
+
+.iconBtn3 {
+  font-size: 1rem;
+  border-radius: 4px;
+  padding-right: 0.75rem;
+  padding-left: 0.75rem;
+  border: none;
+}
+
+.btnAtras2 {
+  background: #a7e5fd;
+  color: #326579;
+  margin-right: 0;
+  font-family: 'Inter', sans-serif;
+}
+.btnCerrar2 {
+  background: #b7f7d0;
+  color: #1f5c36;
+  margin-left: 0;
+  font-family: 'Inter', sans-serif;
+}
+
+.modalBotones {
+  display: flex;
+  justify-content: space-between;
+}
+
+@media (max-width: 500px) {
+  .botones, .botones_abajo{
+    display: flex;
+    flex-direction: column;
+    align-items: center;    /* centra los botones */
+    gap: 0.75rem;            /* espacio vertical entre ellos */
+    width: 100%;
+    padding: 0 1rem;        /* margen lateral */
+  }
+  
+  .botones_abajo button{
+    width: 100%;
+  }
+
+  .botones button {
+    font-size: 1.2rem;
+  }
+
+  .modal {
+    top: 5%;
+    padding: 0.5rem;
+  }
+}
+
+.sugerencias {
+  margin-top: 1rem;
+  background: #eef6fc;
+  padding: 1rem;
+  border-radius: 6px;
+  color: #204a73;
+  font-size: 1rem;
+}
+
+/* Nuevas clases */
+.marginTop16 {
+  margin-top: 16px;
+}
+
+.textCenter {
+  text-align: center;
+}
+
+.successMessage {
+  margin-top: 12px;
+  font-weight: 500;
+  font-size: 18px;
+}
+
+.orderNumber {
+  font-weight: 400;
+  font-size: 15px;
+}
+
+.okButton {
+  margin-top: 18px;
+  background: #003972;
+  color: #ffffff;
+  padding: 0.8rem 2.2rem;
+  border: none;
+  border-radius: 7px;
+  font-weight: 600;
+  font-size: 16px;
+  cursor: pointer;
+  box-shadow: 0 2px 7px #c4d8ea80;
+}
+
+.referenciaTextarea {
+  width: 100%;
+  padding: 0.8rem;
+  font-size: 1rem;
+  border-radius: 10px;
+  box-sizing: border-box;
+  min-height: 49px;
+  max-height: 120px;
+  height: 49px;
+  resize: none;
+  overflow-y: hidden;
+}
+
+.hiddenButton {
+  visibility: hidden;
+  height: 10%;
+  overflow: hidden;
+}
+
+.errorMessage {
+  color: red;
+  font-size: 13px;
+  margin-top: 4px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.fullWidth {
+  width: 100%;
+}
+
+.materialsTable {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.tableHeader {
+  text-align: left;
+  padding: 1rem 0.5rem 0rem 0.5rem;
+  font-size: 23px;
+}
+
+.tableCell {
+  padding: 0.3rem 0.3rem 0.3rem 0rem;
+  width: 50px;
+}
+
+.inputBase {
+  width: 100%;
+  height: 49px;
+  padding: 0.4rem;
+  border-radius: 10px;
+  font-size: 15px;
+  box-sizing: border-box;
+  vertical-align: middle;
+}
+
+.textareaBase {
+  width: 100%;
+  border-radius: 10px;
+  min-height: 49px;
+  max-height: 120px;
+  height: 49px;
+  resize: none;
+  overflow-y: hidden;
+  box-sizing: border-box;
+  font-size: 15px;
+  padding: 0.4rem;
+  vertical-align: middle;
+}
+
+.errorCell {
+  padding: 4px 8px;
+}
+
+.errorContent {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}

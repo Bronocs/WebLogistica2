@@ -1,0 +1,329 @@
+/* styles/VerOrdenes.module.css */
+
+.container {
+  max-width: 800px;
+  margin: 2rem auto;
+  padding: 0 1rem;
+  font-family: 'Inter', sans-serif;
+}
+
+.container h1 {
+  text-align: center;
+  margin-bottom: 1.5rem;
+}
+
+.controls {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.controls button {
+  padding: 0.5rem 1rem;
+  border: 2px solid #0074D9;
+  background: white;
+  color: #0074D9;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: bold;
+  font-family: 'Inter', sans-serif;
+}
+
+.controls button.active {
+  background: #0074D9;
+  color: white;
+}
+
+.search {
+  display: block;
+  width: 100%;
+  max-width: 400px;
+  margin: 0 auto 1.5rem;
+  padding: 0.6rem 0.8rem;
+  font-size: 1rem;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  box-sizing: border-box;
+}
+
+.list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.item {
+  background: #f8f8f8;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  padding: 1rem;
+  margin-bottom: 1rem;
+}
+
+.item > div {
+  margin-bottom: 0.5rem;
+}
+
+.linkBtn {
+  display: inline-block;
+  padding: 0.4rem 0.8rem;
+  background: #58D68D;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  margin: 0.8rem;
+}
+
+.linkBtn:disabled {
+  background: #ccc;
+  cursor: default;
+}
+
+.contenedor {
+  max-width: 600px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 1rem;
+  font-family: 'Inter', sans-serif;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  min-height: 100vh;
+}
+
+.logo {
+  margin-bottom: 1.5rem;  /* separa el logo del título */
+  width: 100%;
+  height: auto;
+}
+
+.contenedor h1 {
+  text-align: center;
+  margin-bottom: 1rem;
+}
+
+.titulo {
+  text-align: center;
+  font-size: 1.5rem;
+  margin-bottom: 1rem;
+}
+
+.botones_abajo,
+.botones {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  margin-bottom: 1rem;
+  flex-wrap: wrap;
+  width: 100%;
+  padding: 0rem 1rem;
+}
+
+.botones_pendientes {
+  border: 2px solid #000000;
+  border-radius: 6px;
+  margin-bottom: 1rem;
+  background: #f8f8f8;
+  width: 100%;
+}
+
+.tabla {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 1rem;
+}
+
+.encabezado {
+  background-color: #f5f5f5;
+}
+
+.celda {
+  border: 1px solid #ddd;
+  padding: 0.75rem;
+  text-align: left;
+}
+
+.botones_abajo button {
+  font-size: 1.5rem;
+  flex: 1 1 30%;
+  font-family: 'Inter', sans-serif;
+}
+
+.botones button {
+  font-size: 1.5rem;
+  padding: 0.5rem 1rem;
+  flex: 1 1 30%;
+  font-family: 'Inter', sans-serif;
+}
+
+.lista {
+  list-style: none;
+  padding: 0;
+}
+
+.sinDatos {
+  text-align: center;
+  color: #777;
+}
+
+.modal {
+  position: fixed;
+  top: 10%;
+  left: 50%;
+  transform: translateX(-50%);
+  background: white;
+  border: 1px solid #ccc;
+  padding: 1rem;
+  width: 90%;
+  max-width: 400px;
+  box-shadow: 0 0 10px rgba(0,0,0,0.1);
+  z-index: 10;
+}
+
+.modal input {
+  display: block;
+  width: 100%;
+  margin-bottom: 0.5rem;
+  padding: 0.5rem;
+  font-size: 1rem;
+  font-family: 'Inter', sans-serif;
+}
+
+.materialesLista li {
+  max-width: 100%;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  white-space: normal;
+  word-break: break-word;
+  margin-bottom: 0.5rem;
+}
+
+.overlay {
+  position: fixed;
+  top: 0; left: 0; width: 100vw; height: 100vh;
+  background: rgba(0,0,0,0.18);
+  z-index: 5000;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.modal {
+  background: #fff;
+  border-radius: 12px;
+  padding: 2rem 1.8rem;
+  box-shadow: 0 8px 32px 0 rgba(60, 60, 100, 0.17);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 250px;
+  min-height: 150px;
+}
+
+.spinner {
+  border: 5px solid #f0f0f0;
+  border-top: 5px solid #0074D9;
+  border-radius: 50%;
+  width: 48px;
+  height: 48px;
+  animation: spin 1s linear infinite;
+  margin-bottom: 0.5rem;
+}
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+
+.header2 {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;  /* Espacio entre botones e input */
+}
+
+.container h3 {
+  text-align: center;
+}
+
+.bloque_busqueda {
+  width: 100%;
+  margin-bottom: 1.5rem;
+  padding: 0 1rem;
+}
+/* Estilos base que ya tenías */
+.btnLibre2 {
+  flex: 1; /* El input ocupará el espacio entre botones */
+  padding: 0; /* Elimino el padding/margin lateral */
+  margin: 0;
+}
+
+.iconBtn2 {
+  font-size: 1rem;
+  padding: 0.75rem;
+  border-radius: 4px;
+  border: none;
+  /* Si quieres, define un ancho fijo */
+  min-width: 42px;
+  min-height: 42px;
+}
+
+.btnAtras2 {
+  background: #a7e5fd;
+  color: #326579;
+  margin-right: 0;
+  font-family: 'Inter', sans-serif;
+}
+.btnCerrar2 {
+  background: #b7f7d0;
+  color: #1f5c36;
+  margin-left: 0;
+  font-family: 'Inter', sans-serif;
+}
+/* Para que iconBtn controle solo el tamaño del texto/ícono */
+.iconBtn2 {
+  font-size: 1rem;
+  padding: 0.75rem;
+  border-radius: 4px;
+  border: none;
+}
+
+.modalBotones {
+  display: flex;
+  justify-content: space-between;
+}
+
+@media (max-width: 500px) {
+  .botones, .botones_abajo{
+    display: flex;
+    flex-direction: column;
+    align-items: center;    /* centra los botones */
+    gap: 0.75rem;            /* espacio vertical entre ellos */
+    width: 100%;
+    padding: 0 1rem;        /* margen lateral */
+  }
+  
+  .botones_abajo button{
+    width: 100%;
+  }
+
+  .botones button {
+    font-size: 1.2rem;
+  }
+
+  .modal {
+    top: 5%;
+    padding: 0.5rem;
+  }
+}
+
+.sugerencias {
+  margin-top: 1rem;
+  background: #eef6fc;
+  padding: 1rem;
+  border-radius: 6px;
+  color: #204a73;
+  font-size: 1rem;
+}

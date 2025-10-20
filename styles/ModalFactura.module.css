@@ -1,0 +1,45 @@
+.modal-bg {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100vw; height: 100vh;
+  background: rgba(40,40,50,0.36);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 99;
+}
+.modal-card {
+  background: #fff;
+  border-radius: 1rem;
+  padding: 2rem;
+  min-width: 280px;
+  max-width: 94vw;
+  box-shadow: 0 6px 32px 0 rgba(0,0,0,0.16);
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  font-family: 'Inter', sans-serif;
+}
+.modal-card input {
+  border: 1px solid #bbb;
+  border-radius: 0.8rem;
+  padding: 0.6rem 1rem;
+  font-size: 1.1rem;
+  margin-bottom: 0.5rem;
+  font-family: 'Inter', sans-serif;
+}
+.modal-card button {
+  background: #289cff;
+  color: #fff;
+  border: none;
+  border-radius: 0.8rem;
+  padding: 0.6rem 1.5rem;
+  margin-right: 6px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background 0.18s;
+  font-family: 'Inter', sans-serif;
+}
+.modal-card button:hover {
+  background: #1578cc;
+}

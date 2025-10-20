@@ -1,0 +1,556 @@
+import { use, useState, useRef, React } from 'react';
+import { useRouter } from 'next/router';
+import styles from '../styles/Home.module.css';
+
+export default function Agregar() {
+  const router = useRouter();
+  const [materiales, setMateriales] = useState([
+    { cantidad: '', producto: '' }
+  ]);
+  const [nombreProyecto, setNombreProyecto] = useState('');
+
+  const [loading, setLoading] = useState(false);
+  const [exito, setExito] = useState(null); // para guardar el número de orden
+  const [alerta, setAlerta] = useState(null); // para guardar el número de orden
+  const cantidadRefs = useRef([]);
+  const productoRefs = useRef([]);
+  const inputRef = useRef(null);
+  const [filasInvalidas, setFilasInvalidas] = useState([]);
+  const [cantidadesInvalidas, setCantidadesInvalidas] = useState([]);
+  const [productosInvalidos, setProductosInvalidos] = useState([]);
+  const [keyEnviado, setKeyEnviado] = useState(false);
+  const [erroresActivos, setErroresActivos] = useState(false);
+  const [camposConErrorPrevio, setCamposConErrorPrevio] = useState(new Set());
+  const [parpadeoActivo, setParpadeoActivo] = useState(false);
+
+  const esCantidadValida = (valor) => {
+    const num = Number(valor);
+    if (isNaN(num) || num <= 0) return false;
+
+    const partes = valor.split('.');
+    if (partes.length === 2 && partes[1].length > 2) return false;
+
+    return true;
+  };
+
+  // Función helper para validar según el tipo de campo
+  const esValido = (campo, valor) => {
+    if (campo === 'cantidad') {
+      return esCantidadValida(valor);
+    }
+    if (campo === 'producto') {
+      return valor.trim() !== '';
+    }
+    return true;
+  };
+
+  // Funciones para manejar errores
+  const agregarError = (idx, campo) => {
+    if (campo === 'cantidad') {
+      setCantidadesInvalidas(prev => (prev.includes(idx) ? prev : [...prev, idx]));
+    } else if (campo === 'producto') {
+      setProductosInvalidos(prev => (prev.includes(idx) ? prev : [...prev, idx]));
+    }
+  };
+
+  const quitarError = (idx, campo) => {
+    if (campo === 'cantidad') {
+      setCantidadesInvalidas(prev => prev.filter(i => i !== idx));
+    } else if (campo === 'producto') {
+      setProductosInvalidos(prev => prev.filter(i => i !== idx));
+    }
+  };
+
+  // Validación inteligente
+  const validacionInteligente = (idx, campo, valor, evento) => {
+    const claveField = `${idx}-${campo}`;
+    const yaTenieError = camposConErrorPrevio.has(claveField);
+    
+    // CASO 1: Campo que ya tenía error -> Validar onChange (feedback rápido al corregir)
+    if (yaTenieError && evento === 'change') {
+      // 🎯 VALIDACIÓN ESPECIAL: Para campos que fallan por estar vacíos cuando el otro tiene contenido
+      const fila = materiales[idx];
+      const esValido_actualizado = 
+        campo === 'cantidad' ? esCantidadValida(valor) : valor.trim() !== '';
+      
+      // Si el campo se está corrigiendo (ahora es válido), quitar error
+      if (esValido_actualizado) {
+        quitarError(idx, campo);
+        setCamposConErrorPrevio(prev => {
+          const nuevo = new Set(prev);
+          nuevo.delete(claveField);
+          return nuevo;
+        });
+      }
+      return;
+    }
+    
+    // CASO 2: Campo nuevo -> Solo validar onBlur o onEnter/Tab
+    if (!yaTenieError && (evento === 'blur' || evento === 'keydown')) {
+      const fila = materiales[idx]; 
+      const esUltimaFila = idx === materiales.length - 1;
+      const filaCompletamenteVacia = !fila.cantidad.trim() && !fila.producto.trim();
+      
+      // Excepción: Si es última fila Y está completamente vacía, no validar
+      if (esUltimaFila && filaCompletamenteVacia) return;
+      
+      // Para todas las demás filas (incluyendo última fila con contenido), validar normalmente
+      if (!esValido(campo, valor)) {
+        agregarError(idx, campo);
+        setCamposConErrorPrevio(prev => new Set([...prev, claveField]));
+      }
+    }
+  };
+
+  // Maneja cambios en los inputs de la tabla
+const handleInputChange = (idx, campo, valor) => {
+  const nuevosMateriales = materiales.map((mat, i) =>
+    i === idx ? { ...mat, [campo]: valor } : mat
+  );
+
+  // Si esta es la última fila y tiene datos en ambos campos, agrega una nueva fila vacía
+  let materialesActualizados = nuevosMateriales;
+  if (
+    idx === materiales.length - 1 &&
+    nuevosMateriales[idx].cantidad.trim() &&
+    nuevosMateriales[idx].producto.trim()
+  ) {
+    materialesActualizados = [...nuevosMateriales, { cantidad: '', producto: '' }];
+  }
+
+  // Elimina filas vacías, dejando solo UNA al final
+  const noVacias = materialesActualizados.filter(
+    (m, i) =>
+      i === materialesActualizados.length - 1 ||
+      m.cantidad.trim() !== '' ||
+      m.producto.trim() !== ''
+  );
+
+  setMateriales(noVacias);
+
+  // 🚨 REINDEXAR ERRORES cuando cambia la estructura de filas
+  if (noVacias.length !== materiales.length) {
+    // Se eliminaron filas, necesitamos reindexar los errores
+    const nuevasCantidadesInvalidas = [];
+    const nuevosProductosInvalidos = [];
+    const nuevosCamposConError = new Set();
+
+    // Para cada fila actual, verificar si tiene errores reales
+    noVacias.forEach((fila, nuevoIdx) => {
+      const esUltimaFila = nuevoIdx === noVacias.length - 1;
+      const filaCompletamenteVacia = !fila.cantidad.trim() && !fila.producto.trim();
+      
+      // Excepción: Solo skip si es última fila Y está completamente vacía
+      if (esUltimaFila && filaCompletamenteVacia) {
+        return;
+      }
+
+      // Para todas las demás filas (incluyendo última con contenido), verificar errores normalmente
+      if (fila.cantidad.trim() && !esCantidadValida(fila.cantidad)) {
+        nuevasCantidadesInvalidas.push(nuevoIdx);
+        nuevosCamposConError.add(`${nuevoIdx}-cantidad`);
+      }
+      
+      if (!fila.producto.trim() && fila.cantidad.trim()) {
+        nuevosProductosInvalidos.push(nuevoIdx);
+        nuevosCamposConError.add(`${nuevoIdx}-producto`);
+      }
+      
+      if (!fila.cantidad.trim() && fila.producto.trim()) {
+        nuevasCantidadesInvalidas.push(nuevoIdx);
+        nuevosCamposConError.add(`${nuevoIdx}-cantidad`);
+      }
+    });
+
+    setCantidadesInvalidas(nuevasCantidadesInvalidas);
+    setProductosInvalidos(nuevosProductosInvalidos);
+    setCamposConErrorPrevio(nuevosCamposConError);
+  }
+
+  // 🚨 LIMPIAR ERROR de la última fila SOLO si está completamente vacía
+  const ultimaFila = noVacias.length - 1;
+  const filaFinal = noVacias[ultimaFila];
+  if (filaFinal && !filaFinal.cantidad.trim() && !filaFinal.producto.trim()) {
+    // Solo limpiar si está completamente vacía - así debe mantenerse la última fila
+    setCantidadesInvalidas(prev => prev.filter(i => i !== ultimaFila));
+    setProductosInvalidos(prev => prev.filter(i => i !== ultimaFila));
+    setCamposConErrorPrevio(prev => {
+      const nuevo = new Set(prev);
+      nuevo.delete(`${ultimaFila}-cantidad`);
+      nuevo.delete(`${ultimaFila}-producto`);
+      return nuevo;
+    });
+  }
+};
+
+  const comprobarLlenado = () => {
+    const invalidas = [];
+
+    for (let i = 0; i < materiales.length; i++) {
+      const fila = materiales[i];
+      const incompleta = (fila.cantidad === '' && fila.producto !== '') || 
+                        (fila.cantidad !== '' && fila.producto === '');
+      if (incompleta) {
+        invalidas.push(i); // guarda el índice
+      }
+    }
+
+    setFilasInvalidas(invalidas);
+    return invalidas.length === 0;
+  };
+
+  // Eliminar filas vacías antes de enviar
+  const getMaterialesFinal = () =>
+    materiales.filter(
+      m => m.cantidad.trim() !== '' && m.producto.trim() !== ''
+    );
+    
+  // Envía los materiales (ejemplo)
+
+  const cambiarColor = () => {
+    if (keyEnviado) {
+      if (!nombreProyecto.trim()) {
+      inputRef.current.style.border = '2px solid #ccc'
+      return;
+    }
+    }
+  }
+
+  const enviarPedidos = async () => {
+    const materialesFinal = getMaterialesFinal();
+    
+    // Verificar si hay errores de validación activos
+    if (cantidadesInvalidas.length > 0 || productosInvalidos.length > 0) {
+      setAlerta('Por favor corrige todos los errores antes de enviar');
+      setKeyEnviado(true);
+      // Activar parpadeo
+      setParpadeoActivo(true);
+      setTimeout(() => setParpadeoActivo(false), 2000);
+      return;
+    }
+    
+    // 🎯 VALIDACIÓN ESPECIAL AL ENVIAR: Verificar última fila PARCIALMENTE completa (no completamente vacía)
+    const ultimaFilaIdx = materiales.length - 1;
+    const ultimaFila = materiales[ultimaFilaIdx];
+    const tieneUltimaFilaParcial = ultimaFila && 
+      ((ultimaFila.cantidad.trim() && !ultimaFila.producto.trim()) || 
+       (!ultimaFila.cantidad.trim() && ultimaFila.producto.trim()));
+    
+    if (tieneUltimaFilaParcial) {
+      console.log('🚨 ÚLTIMA FILA PARCIAL DETECTADA AL ENVIAR:', ultimaFila);
+      
+      // Agregar errores visuales a la última fila
+      if (ultimaFila.cantidad.trim() && !ultimaFila.producto.trim()) {
+        setProductosInvalidos(prev => prev.includes(ultimaFilaIdx) ? prev : [...prev, ultimaFilaIdx]);
+        setCamposConErrorPrevio(prev => new Set([...prev, `${ultimaFilaIdx}-producto`]));
+      }
+      if (!ultimaFila.cantidad.trim() && ultimaFila.producto.trim()) {
+        setCantidadesInvalidas(prev => prev.includes(ultimaFilaIdx) ? prev : [...prev, ultimaFilaIdx]);
+        setCamposConErrorPrevio(prev => new Set([...prev, `${ultimaFilaIdx}-cantidad`]));
+      }
+      
+      setAlerta('Por favor completa todos los campos de la última fila');
+      setKeyEnviado(true);
+      // Activar parpadeo
+      setParpadeoActivo(true);
+      setTimeout(() => setParpadeoActivo(false), 2000);
+      return;
+    }
+    
+    if (!nombreProyecto.trim()) {
+      inputRef.current.style.border = '2px solid #E74C3C';
+      setKeyEnviado(true);
+      // Activar parpadeo
+      setParpadeoActivo(true);
+      setTimeout(() => setParpadeoActivo(false), 2000);
+      return;
+    }
+    if (materialesFinal.length === 0) {
+      setCantidadesInvalidas([0]);
+      setProductosInvalidos([0]);
+      // 🎯 IMPORTANTE: Marcar en camposConErrorPrevio para que la validación inteligente funcione
+      setCamposConErrorPrevio(prev => new Set([...prev, '0-cantidad', '0-producto']));
+      setKeyEnviado(true);
+      // Activar parpadeo
+      setParpadeoActivo(true);
+      setTimeout(() => setParpadeoActivo(false), 2000);
+      return;
+    }
+    if (!comprobarLlenado()) {
+      setKeyEnviado(true);
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const res = await fetch('/api/guardar', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          nombreProyecto,
+          productos: materialesFinal,
+        }),
+      });
+
+      setLoading(false);
+
+      if (res.ok) {
+        const data = await res.json();
+        setExito(data.numeroOrden); // activa el modal de éxito
+        setMateriales([{ cantidad: '', producto: '' }]);
+        setNombreProyecto('');
+      } else {
+        alert('Error al enviar el pedido');
+      }
+    } catch (err) {
+      setLoading(false);
+      console.error('Error al enviar:', err);
+      alert('Error de conexión');
+    }
+  };
+
+  const handleKeyDownCantidad = (e, idx) => {
+    if (e.key === 'Enter' || e.key === 'Tab') {
+      e.preventDefault();
+      validacionInteligente(idx, 'cantidad', materiales[idx].cantidad, 'keydown');
+      productoRefs.current[idx]?.focus();
+    }
+  };
+
+  const handleKeyDownProducto = (e, idx) => {
+    if (e.key === 'Enter' || e.key === 'Tab') {
+      e.preventDefault();
+      validacionInteligente(idx, 'producto', materiales[idx].producto, 'keydown');
+      cantidadRefs.current[idx + 1]?.focus();
+    }
+  };
+
+  return (
+    <div className={styles.contenedor}>
+        {/* MODAL CARGANDO */}
+        {loading && (
+          <div className={styles.overlay}>
+            <div className={styles.modal}>
+              <div className={styles.spinner}></div>
+              <p className={styles.marginTop16}>Enviando...</p>
+            </div>
+          </div>
+        )}
+        {exito && (
+          <div className={styles.overlay}>
+            <div className={`${styles.modal} ${styles.textCenter}`}>
+              <svg width="48" height="48" viewBox="0 0 48 48" fill="none">
+                <circle cx="24" cy="24" r="24" fill="#58D68D"/>
+                <path d="M14 25.5L21.5 33L34 18" stroke="white" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+              <p className={styles.successMessage}>
+                Pedido enviado con éxito<br />
+                <span className={styles.orderNumber}>
+                  Número de orden: <b>{exito}</b>
+                </span>
+              </p>
+              <button
+                onClick={() => router.push('/')}
+                className={styles.okButton}
+              >
+                OK                
+              </button>
+            </div>
+          </div>
+        )}
+
+      <div className={styles.header2}>
+        <button className={`${styles.iconBtn2} ${styles.btnAtras2}`} onClick={() => router.push('/')}>
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640" height='25' width='25'><path d="M304 70.1C313.1 61.9 326.9 61.9 336 70.1L568 278.1C577.9 286.9 578.7 302.1 569.8 312C560.9 321.9 545.8 322.7 535.9 313.8L527.9 306.6L527.9 511.9C527.9 547.2 499.2 575.9 463.9 575.9L175.9 575.9C140.6 575.9 111.9 547.2 111.9 511.9L111.9 306.6L103.9 313.8C94 322.6 78.9 321.8 70 312C61.1 302.2 62 287 71.8 278.1L304 70.1zM320 120.2L160 263.7L160 512C160 520.8 167.2 528 176 528L224 528L224 424C224 384.2 256.2 352 296 352L344 352C383.8 352 416 384.2 416 424L416 528L464 528C472.8 528 480 520.8 480 512L480 263.7L320 120.3zM272 528L368 528L368 424C368 410.7 357.3 400 344 400L296 400C282.7 400 272 410.7 272 424L272 528z"/></svg>
+        </button>
+        <div className={styles.btnLibre2}>
+          <textarea
+            ref={inputRef}
+            placeholder="Escribir referencia"
+            value={nombreProyecto}
+            onChange={e => {setNombreProyecto(e.target.value);
+                            cambiarColor();
+            }}
+            onInput={e => {
+              e.target.style.height = '49px';
+              if (e.target.scrollHeight > 49) {
+                e.target.style.height = e.target.scrollHeight + 'px';
+              }
+            }}
+            className={`${styles.referenciaTextarea} ${(!nombreProyecto.trim() && keyEnviado) ? 'textarea-error' : ''} ${parpadeoActivo && (!nombreProyecto.trim() && keyEnviado) ? 'parpadeo' : ''}`.trim()}
+            style={{
+              border: (!nombreProyecto.trim() && keyEnviado) ? '2px solid red' : '2px solid #ccc',
+            }}
+          />
+          <style jsx global>{`
+            input, textarea {
+              font-family: inherit;
+              font-size: inherit;
+            }
+            
+            input::placeholder {
+              font-style: italic;
+              color: #9a9a9aff;
+            }
+            
+            .input-error {
+              border: 2px solid red !important;
+              box-shadow: 0 0 5px rgba(255, 0, 0, 0.3) !important;
+            }
+            
+            .input-error:focus {
+              border: 2px solid red !important;
+              outline: 2px solid red !important;
+              box-shadow: 0 0 8px rgba(255, 0, 0, 0.5) !important;
+            }
+            
+            .textarea-error {
+              border: 2px solid red !important;
+              box-shadow: 0 0 5px rgba(255, 0, 0, 0.3) !important;
+            }
+            
+            .textarea-error:focus {
+              border: 2px solid red !important;
+              outline: 2px solid red !important;
+              box-shadow: 0 0 8px rgba(255, 0, 0, 0.5) !important;
+            }
+            
+            @keyframes parpadeo {
+              0%, 50%, 100% { opacity: 1; }
+              25%, 75% { opacity: 0.3; }
+            }
+            
+            .parpadeo {
+              animation: parpadeo 0.6s ease-in-out 3;
+            }
+          `}</style>
+        </div>
+        <button className={`${styles.iconBtn2} ${styles.btnCerrar2}`} onClick={enviarPedidos}>
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640" fill='currentColor' height='25' width='25'><path d="M322.5 351.7L523.4 150.9L391 520.3L322.5 351.7zM489.4 117L288.6 317.8L120 249.3L489.4 117zM70.1 280.8L275.9 364.4L359.5 570.2C364.8 583.3 377.6 591.9 391.8 591.9C406.5 591.9 419.6 582.7 424.6 568.8L602.6 72C606.1 62.2 603.6 51.4 596.3 44C589 36.6 578.1 34.2 568.3 37.7L71.4 215.7C57.5 220.7 48.3 233.8 48.3 248.5C48.3 262.7 56.9 275.5 70 280.8z"/></svg>
+        </button>
+      </div>
+    {!nombreProyecto.trim() && keyEnviado && (
+      <div className={styles.header2}>
+        <button className={`${styles.iconBtn3} ${styles.btnAtras2} ${styles.hiddenButton}`} onClick={() => router.push('/')}>
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 16 16">
+            <path d="M8.354 1.146a.5.5 0 0 0-.708 0l-6 6A.5.5 0 0 0 1.5 7.5v7a.5.5 0 0 0 .5.5h4.5a.5.5 0 0 0 .5-.5v-4h2v4a.5.5 0 0 0 .5.5H14a.5.5 0 0 0 .5-.5v-7a.5.5 0 0 0-.146-.354L13 5.793V2.5a.5.5 0 0 0-.5-.5h-1a.5.5 0 0 0-.5.5v1.293zM2.5 14V7.707l5.5-5.5 5.5 5.5V14H10v-4a.5.5 0 0 0-.5-.5h-3a.5.5 0 0 0-.5.5v4z"/>
+          </svg>
+        </button>
+        <div className={styles.btnLibre2}>
+            <div className={styles.errorMessage}>
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640" width="14" height="14" fill="currentColor">
+                <path d="M320 64C334.7 64 348.2 72.1 355.2 85L571.2 485C577.9 497.4 577.6 512.4 570.4 524.5C563.2 536.6 550.1 544 536 544L104 544C89.9 544 76.9 536.6 69.6 524.5C62.3 512.4 62.1 497.4 68.8 485L284.8 85C291.8 72.1 305.3 64 320 64zM320 232C306.7 232 296 242.7 296 256L296 368C296 381.3 306.7 392 320 392C333.3 392 344 381.3 344 368L344 256C344 242.7 333.3 232 320 232zM346.7 448C347.3 438.1 342.4 428.7 333.9 423.5C325.4 418.4 314.7 418.4 306.2 423.5C297.7 428.7 292.8 438.1 293.4 448C292.8 457.9 297.7 467.3 306.2 472.5C314.7 477.6 325.4 477.6 333.9 472.5C342.4 467.3 347.3 457.9 346.7 448z"/>
+              </svg>
+              Ingresa la referencia
+            </div>
+        </div>
+        <button className={`${styles.iconBtn3} ${styles.btnCerrar2} ${styles.hiddenButton}`} onClick={enviarPedidos}>
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 16 16">
+            <path d="M15.854.146a.5.5 0 0 1 .11.54l-5.819 14.547a.75.75 0 0 1-1.329.124l-3.178-4.995L.643 7.184a.75.75 0 0 1 .124-1.33L15.314.037a.5.5 0 0 1 .54.11ZM6.636 10.07l2.761 4.338L14.13 2.576zm6.787-8.201L1.591 6.602l4.339 2.76z"/>
+          </svg>
+        </button>
+      </div>
+    )}
+
+      <div className={styles.fullWidth}>
+        <table className={styles.materialsTable}>
+          <thead>
+            <tr>
+              <th className={styles.tableHeader}>Cant.</th>
+              <th className={styles.tableHeader}>Producto o Servicio</th>
+            </tr>
+          </thead>
+            <tbody>
+              {materiales.map((fila, idx) => (
+                <React.Fragment key={idx}>
+                  <tr>
+                    <td className={styles.tableCell}>
+                      <input
+                        type="text"
+                        ref={el => cantidadRefs.current[idx] = el}
+                        value={fila.cantidad}
+                        onChange={e => {
+                          handleInputChange(idx, 'cantidad', e.target.value);
+                          validacionInteligente(idx, 'cantidad', e.target.value, 'change');
+                        }}
+                        onBlur={e => {validacionInteligente(idx, 'cantidad', fila.cantidad, 'blur');
+                        }}
+                        onKeyDown={e => handleKeyDownCantidad(e, idx)}
+                        className={`${styles.inputBase} ${cantidadesInvalidas.includes(idx) && (idx !== materiales.length - 1 || keyEnviado) ? 'input-error' : ''} ${parpadeoActivo && cantidadesInvalidas.includes(idx) ? 'parpadeo' : ''}`.trim()}
+                        style={{
+                          border: cantidadesInvalidas.includes(idx) && (idx !== materiales.length - 1 || keyEnviado) ? '2px solid red' : '2px solid #ccc',
+                        }}
+                      />
+                    </td>
+                    <td className={styles.tableCell}>
+                      <textarea
+                        ref={el => productoRefs.current[idx] = el}
+                        value={fila.producto}
+                        onChange={e => {
+                          handleInputChange(idx, 'producto', e.target.value);
+                          validacionInteligente(idx, 'producto', e.target.value, 'change');
+                        }}
+                        onBlur={() => validacionInteligente(idx, 'producto', fila.producto, 'blur')}
+                        onInput={e => {
+                          e.target.style.height = '49px';
+                          if (e.target.scrollHeight > 49) {
+                            e.target.style.height = e.target.scrollHeight + 'px';
+                          }
+                        }}
+                        onKeyDown={e => {
+                          handleKeyDownProducto(e, idx); // Para navegación
+                          if (e.key === 'Enter' || e.key === 'Tab') {
+                            validacionInteligente(idx, 'producto', fila.producto, 'keydown'); // Para validación
+                          }
+                        }}
+                        className={`${styles.textareaBase} ${productosInvalidos.includes(idx) && (idx !== materiales.length - 1 || keyEnviado) ? 'textarea-error' : ''} ${parpadeoActivo && productosInvalidos.includes(idx) ? 'parpadeo' : ''}`.trim()}
+                        style={{
+                          border: productosInvalidos.includes(idx) && (idx !== materiales.length - 1 || keyEnviado) ? '2px solid red' : '2px solid #ccc',
+                        }}
+                      />
+                    </td>
+                  </tr>
+
+                  {/* Fila para mostrar mensaje de error */}
+                  {(productosInvalidos.includes(idx) || cantidadesInvalidas.includes(idx)) && 
+                   (idx !== materiales.length - 1 || keyEnviado) && (
+                    <tr>
+                      <td colSpan={2} className={styles.errorCell}>
+                        <div className={styles.errorMessage} style={{textAlign: productosInvalidos.includes(idx) && !cantidadesInvalidas.includes(idx) ? 'center' : 'left'}}>
+                          {productosInvalidos.includes(idx) && !cantidadesInvalidas.includes(idx) && (
+                            <div className={styles.errorContent}>
+                              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640" width="14" height="14" fill="currentColor">
+                                <path d="M320 64C334.7 64 348.2 72.1 355.2 85L571.2 485C577.9 497.4 577.6 512.4 570.4 524.5C563.2 536.6 550.1 544 536 544L104 544C89.9 544 76.9 536.6 69.6 524.5C62.3 512.4 62.1 497.4 68.8 485L284.8 85C291.8 72.1 305.3 64 320 64zM320 232C306.7 232 296 242.7 296 256L296 368C296 381.3 306.7 392 320 392C333.3 392 344 381.3 344 368L344 256C344 242.7 333.3 232 320 232zM346.7 448C347.3 438.1 342.4 428.7 333.9 423.5C325.4 418.4 314.7 418.4 306.2 423.5C297.7 428.7 292.8 438.1 293.4 448C292.8 457.9 297.7 467.3 306.2 472.5C314.7 477.6 325.4 477.6 333.9 472.5C342.4 467.3 347.3 457.9 346.7 448z"/>
+                              </svg>
+                              Falta producto
+                            </div>
+                          )}
+                          {cantidadesInvalidas.includes(idx) && !productosInvalidos.includes(idx) && (
+                            <div className={styles.errorContent}>
+                              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640" width="14" height="14" fill="currentColor">
+                                <path d="M320 64C334.7 64 348.2 72.1 355.2 85L571.2 485C577.9 497.4 577.6 512.4 570.4 524.5C563.2 536.6 550.1 544 536 544L104 544C89.9 544 76.9 536.6 69.6 524.5C62.3 512.4 62.1 497.4 68.8 485L284.8 85C291.8 72.1 305.3 64 320 64zM320 232C306.7 232 296 242.7 296 256L296 368C296 381.3 306.7 392 320 392C333.3 392 344 381.3 344 368L344 256C344 242.7 333.3 232 320 232zM346.7 448C347.3 438.1 342.4 428.7 333.9 423.5C325.4 418.4 314.7 418.4 306.2 423.5C297.7 428.7 292.8 438.1 293.4 448C292.8 457.9 297.7 467.3 306.2 472.5C314.7 477.6 325.4 477.6 333.9 472.5C342.4 467.3 347.3 457.9 346.7 448z"/>
+                              </svg>
+                              Ingresa cantidades numéricas
+                            </div>
+                          )}
+                          {cantidadesInvalidas.includes(idx) && productosInvalidos.includes(idx) && (
+                            <div className={styles.errorContent}>
+                              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640" width="14" height="14" fill="currentColor">
+                                <path d="M320 64C334.7 64 348.2 72.1 355.2 85L571.2 485C577.9 497.4 577.6 512.4 570.4 524.5C563.2 536.6 550.1 544 536 544L104 544C89.9 544 76.9 536.6 69.6 524.5C62.3 512.4 62.1 497.4 68.8 485L284.8 85C291.8 72.1 305.3 64 320 64zM320 232C306.7 232 296 242.7 296 256L296 368C296 381.3 306.7 392 320 392C333.3 392 344 381.3 344 368L344 256C344 242.7 333.3 232 320 232zM346.7 448C347.3 438.1 342.4 428.7 333.9 423.5C325.4 418.4 314.7 418.4 306.2 423.5C297.7 428.7 292.8 438.1 293.4 448C292.8 457.9 297.7 467.3 306.2 472.5C314.7 477.6 325.4 477.6 333.9 472.5C342.4 467.3 347.3 457.9 346.7 448z"/>
+                              </svg>
+                              Falta producto y cantidad es inválida
+                            </div>
+                          )}
+                        </div>
+                      </td>
+                    </tr>
+                  )}
+                </React.Fragment>
+              ))}
+            </tbody>
+        </table>
+      </div>
+      
+    </div>
+  );
+}

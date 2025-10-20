@@ -1,0 +1,201 @@
+/* styles/Modal.module.css */
+
+.overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 100vh;
+  width: 100vw;
+  background: rgba(0, 0, 0, 0.6);
+
+  display: flex;
+  align-items: flex-start;    /* en lugar de center */
+  justify-content: center;    /* mantiene el centrado horizontal */
+
+  /* opcional: separa unos píxeles desde arriba */
+  padding-top: 2rem;
+  z-index: 1000;
+}
+
+.modal {
+  background: #fff;
+  width: 95%;
+  max-width: 400px;
+  padding: 1.5rem;
+  border-radius: 8px;
+  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);
+  font-family: 'Inter', sans-serif;
+
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+/* Header con flecha, título y close */
+.header {
+  display: flex;
+  align-items: center;
+  vertical-align:middle;
+  grid-template-columns: auto 1fr auto;
+}
+
+/* Botones de ícono sin fondo */
+.iconBtn {
+  background: none;
+  border: none;
+  font-size: 1.25rem;
+  line-height: 1;
+  cursor: pointer;
+  padding: 0.25rem;
+}
+
+
+.searchBar input {
+  width: 100%;
+  padding: 0.5rem;
+  font-size: 1rem;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-family: 'Inter', sans-serif;
+}
+
+.lista {
+  border-top: 1px solid #eee;
+  padding-top: 1rem;
+}
+
+.item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.5rem 0;
+  border-bottom: 1px solid #eee;
+  cursor: pointer;
+}
+
+.item:hover {
+  background-color: #f3f3f3;
+}
+
+.codigo {
+  font-size: 0.8rem;
+  color: #555;
+}
+
+.unidad {
+  font-weight: bold;
+  color: #222;
+}
+
+.formulario input,
+.formulario textarea {
+  width: 100%;
+  margin-bottom: 0.5rem;
+  padding: 0.5rem;
+  font-size: 1rem;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-family: 'Inter', sans-serif;
+}
+
+.formulario textarea[name="comentario"] {
+  min-height: 4rem;
+  resize: vertical;
+  width: 100%;
+  padding: 0.5rem;
+  font-size: 1rem;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  box-sizing: border-box;
+  overflow-wrap: break-word;
+  word-break: break-word;
+}
+
+.textarea {
+  width: 100%;
+  min-height: 4rem;
+  padding: 0.5rem;
+  font-size: 1rem;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  resize: vertical;
+  box-sizing: border-box;
+  overflow-wrap: break-word;
+  word-break: break-word;
+}
+
+.materialesLista li {
+  max-width: 100%;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  white-space: normal;
+  word-break: break-word;
+  margin-bottom: 0.5rem;
+}
+
+/* Estilos base que ya tenías */
+.btnLibre,
+.btnAgregar,
+.btnCancelar,
+.btnAtras {
+  width: 100%;
+  padding: 0.75rem;
+  font-size: 1rem;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-family: 'Inter', sans-serif;
+}
+
+/* Botón LIBRE */
+.btnLibre {
+  background: #f0f8ff;
+  color: #0077cc;
+  margin-right: 25px;
+  margin-left: 25px;
+}
+
+/* Botón ATRÁS: mismo look que LIBRE (o ajusta colores) */
+.btnAtras {
+  width: 50px;
+  background: #95a89c;
+  color: #454e48;
+  margin-right: auto;
+}
+
+/* Botón CERRAR: podrías usar otro color, p.ej. rojo suave */
+.btnCerrar {
+  width: 50px;
+  background: #ffe5e5;
+  color: #cc0000;
+  margin-left: auto;
+}
+
+/* Para que iconBtn controle solo el tamaño del texto/ícono */
+.iconBtn {
+  font-size: 1rem;
+  padding: 0.75rem;
+  border-radius: 4px;
+  border: none;
+}
+
+.btnAgregar {
+  background: #28a745;
+  color: white;
+}
+
+.sinDatos {
+  text-align: center;
+  color: #999;
+  word-break: break-word;
+  overflow-wrap: break-word;
+}
+
+@media (min-width: 768px) {
+  .modal {
+    max-width: 600px;
+  }
+}
